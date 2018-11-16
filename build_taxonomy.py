@@ -88,65 +88,65 @@ if dataset == 'ImageNet':
     print('{time:8.3f} s; {num_wnids} novel class candidates with >= {min_num_images} images' \
           .format(time=time.time()-start_time, num_wnids=len(wnids_novel), min_num_images=min_num_images))
 
-elif dataset == 'AWA' or dataset == 'CUB':
-    # leaf wnids in hierarchy
-    words_leaf_path = '{taxonomy_path}/trainvalclasses.txt'.format(taxonomy_path=taxonomy_path)
-    words_leaf = open(words_leaf_path, 'r').read().strip().splitlines()
-    
-    words_novel_path = '{taxonomy_path}/testclasses.txt'.format(taxonomy_path=taxonomy_path)
-    words_novel = open(words_novel_path, 'r').read().strip().splitlines()
-    
-    # update wnid parent to children and child to parents
-    # parents are in the order of the class id, not the line number
-    words_all_path = '{taxonomy_path}/allclasses.txt'.format(taxonomy_path=taxonomy_path)
-    words_all = open(words_all_path, 'r').read().strip().splitlines()
-    wnids_all = ['n90000{id:03d}'.format(id=k+1) for k in range(len(words_all))]
-    word_to_wnid_leaf = dict(zip(words_all, wnids_all))
-    wnids_leaf = [word_to_wnid_leaf[word] for word in words_leaf]
-    wnids_novel = [word_to_wnid_leaf[word] for word in words_novel]
-    if dataset == 'AWA':
-        wnid_parents_path = '{taxonomy_path}/awa_classes_offset_rev1.txt'.format(taxonomy_path=taxonomy_path)
-        wnid_parents_leaf = dict(zip(wnids_all, open(wnid_parents_path, 'r').read().strip().splitlines()))
-    else:
-        synset_parents_path = '{taxonomy_path}/cub_classes_wordnet_rev1.txt'.format(taxonomy_path=taxonomy_path)
-        synset_parents = open(synset_parents_path, 'r').read().strip().splitlines()
-        from nltk.corpus import wordnet as wn
-        wnid_parents_leaf = {word_to_wnid_leaf[word]:
-                             'n{offset:08d}'.format(offset=wn.synset(synset_parents[k]).offset())
-                             for k, word in enumerate(sorted(words_all))}
-    for ch in wnid_parents_leaf:
-        pa = wnid_parents_leaf[ch]
-        assert wnid_child_to_parents.get(pa) is not None, \
-            print('{ch}: no parent {pa} in the initial is-a relationship'.format(ch=ch, pa=pa))
-        if wnid_parent_to_children.get(pa) is None:
-            wnid_parent_to_children[pa] = {ch}
-        else:
-            wnid_parent_to_children[pa].add(ch)
-        if wnid_child_to_parents.get(ch) is None:
-            wnid_child_to_parents[ch] = {pa}
-        else:
-            wnid_child_to_parents[ch].add(pa)
-    print('{time:8.3f} s; wnid_parent_to_children and wnid_child_to_parents update' \
-          .format(time=time.time()-start_time))
-else:
-    raise NotImplementedError('unsupported dataset: {dataset}'.format(dataset=dataset))
+#elif dataset == 'AWA' or dataset == 'CUB':
+#    # leaf wnids in hierarchy
+#    words_leaf_path = '{taxonomy_path}/trainvalclasses.txt'.format(taxonomy_path=taxonomy_path)
+#    words_leaf = open(words_leaf_path, 'r').read().strip().splitlines()
+#    
+#    words_novel_path = '{taxonomy_path}/testclasses.txt'.format(taxonomy_path=taxonomy_path)
+#    words_novel = open(words_novel_path, 'r').read().strip().splitlines()
+#    
+#    # update wnid parent to children and child to parents
+#    # parents are in the order of the class id, not the line number
+#    words_all_path = '{taxonomy_path}/allclasses.txt'.format(taxonomy_path=taxonomy_path)
+#    words_all = open(words_all_path, 'r').read().strip().splitlines()
+#    wnids_all = ['n90000{id:03d}'.format(id=k+1) for k in range(len(words_all))]
+#    word_to_wnid_leaf = dict(zip(words_all, wnids_all))
+#    wnids_leaf = [word_to_wnid_leaf[word] for word in words_leaf]
+#    wnids_novel = [word_to_wnid_leaf[word] for word in words_novel]
+#    if dataset == 'AWA':
+#        wnid_parents_path = '{taxonomy_path}/awa_classes_offset_rev1.txt'.format(taxonomy_path=taxonomy_path)
+#        wnid_parents_leaf = dict(zip(wnids_all, open(wnid_parents_path, 'r').read().strip().splitlines()))
+#    else:
+#        synset_parents_path = '{taxonomy_path}/cub_classes_wordnet_rev1.txt'.format(taxonomy_path=taxonomy_path)
+#        synset_parents = open(synset_parents_path, 'r').read().strip().splitlines()
+#        from nltk.corpus import wordnet as wn
+#        wnid_parents_leaf = {word_to_wnid_leaf[word]:
+#                             'n{offset:08d}'.format(offset=wn.synset(synset_parents[k]).offset())
+#                             for k, word in enumerate(sorted(words_all))}
+#    for ch in wnid_parents_leaf:
+#        pa = wnid_parents_leaf[ch]
+#        assert wnid_child_to_parents.get(pa) is not None, \
+#            print('{ch}: no parent {pa} in the initial is-a relationship'.format(ch=ch, pa=pa))
+#        if wnid_parent_to_children.get(pa) is None:
+#            wnid_parent_to_children[pa] = {ch}
+#        else:
+#            wnid_parent_to_children[pa].add(ch)
+#        if wnid_child_to_parents.get(ch) is None:
+#            wnid_child_to_parents[ch] = {pa}
+#        else:
+#            wnid_child_to_parents[ch].add(pa)
+#    print('{time:8.3f} s; wnid_parent_to_children and wnid_child_to_parents update' \
+#          .format(time=time.time()-start_time))
+#else:
+#    raise NotImplementedError('unsupported dataset: {dataset}'.format(dataset=dataset))
 
-# sanity check: words are related to their parents
-if dataset == 'AWA' or dataset == 'CUB':
-    # wnid to word
-    wnid_to_word_path = 'taxonomy/words.txt'
-    wnid_to_word_list = open(wnid_to_word_path, 'r').read().strip().replace('\t', '\n').splitlines()
-    assert len(wnid_to_word_list) % 2 == 0, 'a wnid has no word?'
-    wnid_to_word = dict(zip(wnid_to_word_list[0::2], wnid_to_word_list[1::2]))
-    print('wnid_to_word; {time:8.3f} s'.format(time=time.time()-start_time))
-    # update wnid to word
-    for k, word in enumerate(words_leaf):
-        wnid_to_word[wnids_leaf[k]] = word
-    for k, word in enumerate(words_novel):
-        wnid_to_word[wnids_novel[k]] = word
-    for wnid in sorted(wnids_leaf + wnids_novel):
-        for pa in wnid_child_to_parents[wnid]:
-            print('{word} - {word_pa}'.format(word=wnid_to_word[wnid], word_pa=wnid_to_word[pa]))
+## sanity check: words are related to their parents
+#if dataset == 'AWA' or dataset == 'CUB':
+#    # wnid to word
+#    wnid_to_word_path = 'taxonomy/words.txt'
+#    wnid_to_word_list = open(wnid_to_word_path, 'r').read().strip().replace('\t', '\n').splitlines()
+#    assert len(wnid_to_word_list) % 2 == 0, 'a wnid has no word?'
+#    wnid_to_word = dict(zip(wnid_to_word_list[0::2], wnid_to_word_list[1::2]))
+#    print('wnid_to_word; {time:8.3f} s'.format(time=time.time()-start_time))
+#    # update wnid to word
+#    for k, word in enumerate(words_leaf):
+#        wnid_to_word[wnids_leaf[k]] = word
+#    for k, word in enumerate(words_novel):
+#        wnid_to_word[wnids_novel[k]] = word
+#    for wnid in sorted(wnids_leaf + wnids_novel):
+#        for pa in wnid_child_to_parents[wnid]:
+#            print('{word} - {word_pa}'.format(word=wnid_to_word[wnid], word_pa=wnid_to_word[pa]))
 
 # wnids in the raw taxonomy
 wnids_raw = set(wnids_leaf)
@@ -180,6 +180,8 @@ if len(wnid_roots) > 1:
     wnid_roots = [wnid_root]
 elif len(wnid_roots) == 0:
     raise AssertionError('no root')
+
+#NOTE: Now wnids_raw contains all supernode wnids.
 
 # sort raw wnids: [leaves, supers in ascend order]
 wnids_super = sorted(wnids_raw.difference(wnids_leaf))
@@ -252,12 +254,15 @@ print('{time:8.3f} s; removed classes sharing the same leaves with its child; {n
 
 print('{time:8.3f} s; a group has  max {max_wnids:4d} wnids' \
       .format(time=time.time()-start_time, max_wnids=max([len(g) for g in wnid_groups.values()])))
+
+
 wnid_counter = collections.Counter([wnid for wnid_group in wnid_groups.values() for wnid in wnid_group])
 print('{time:8.3f} s; a wnid is in max {max_wnids:4d} groups' \
       .format(time=time.time()-start_time, max_wnids=max(wnid_counter.values())))
 
 assert len(wnid_roots) == 1, 'multiple roots'
 wnid_root = wnid_roots[0]
+
 
 # essential wnids
 wnids = copy.deepcopy(wnids_leaf) # sorted(wnids_leaf)

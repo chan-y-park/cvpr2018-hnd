@@ -83,9 +83,9 @@ def shuffle(labels, num_epochs=50, path=None, start_time=time.time()):
                 print('{epoch:4d}/{num_epochs:4d} e; '.format(epoch=epoch+1, num_epochs=num_epochs), end='')
                 print('generate random order; {time:8.3f} s'.format(time=time.time()-start_time))
         
-        if path is not None:
-            with h5py.File(order_path, 'w') as f:
-                f.create_dataset('order', data=order, compression='gzip', compression_opts=9)
+#        if path is not None:
+#            with h5py.File(order_path, 'w') as f:
+#                f.create_dataset('order', data=order, compression='gzip', compression_opts=9)
     
     print('random order; {time:8.3f} s'.format(time=time.time()-start_time))
     return torch.from_numpy(order)

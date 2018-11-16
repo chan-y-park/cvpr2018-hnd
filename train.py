@@ -114,7 +114,7 @@ def main(opts, start_time=time.time()):
     # save path
     save_path = utils.get_path(opts)
     print(save_path)
-    
+
     # load the recent model
     epoch = utils.load_model(model, optimizer, scheduler, save_path, opts.num_epochs, start_time)
     if ('TD+' in opts.method) and epoch == 0:
@@ -155,6 +155,8 @@ def main(opts, start_time=time.time()):
     print('start training; ', end='')
     print('{time:8.3f} s'.format(time=time.time()-start_time))
     for epoch in range(epoch+1, opts.num_epochs+1):
+        import pdb
+        pdb.set_trace()
     
         # stopping criterion
         if optimizer.param_groups[0]['lr'] == 0.: break

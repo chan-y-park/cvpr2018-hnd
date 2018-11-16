@@ -1,4 +1,6 @@
-if [ "$1" = "imagenet" ] && [ "$2" = "relabel" ]; then
+if [ "$1" = "test" ]; then
+    python train.py -gpu -data ImageNet -test -m LOO -bsize 5 -nep 50 -nlrd 2 -loo 1 -cw
+elif [ "$1" = "imagenet" ] && [ "$2" = "relabel" ]; then
     python train.py -gpu -data ImageNet -test -m RLB -bsize 5000 -nep 50 -nlrd 2 -nl 1 -rl 30
 elif [ "$1" = "imagenet" ] && [ "$2" = "loo" ]; then
     python train.py -gpu -data ImageNet -test -m LOO -bsize 5000 -nep 50 -nlrd 2 -loo 1 -cw

@@ -35,7 +35,7 @@ def truncated_normal(model):
     model.weight.data.normal_(std=std)
     truncate_me = (model.weight.data > 2.*std) | (model.weight.data < -2.*std)
     while truncate_me.sum() > 0:
-        model.weight.data[truncate_me] = torch.normal(std=std*torch.ones(truncate_me.sum()))
+        model.weight.data[truncate_me] = torch.normal(mean=0, std=std*torch.ones(truncate_me.sum()))
         truncate_me = (model.weight.data > 2.*std) | (model.weight.data < -2.*std)
     return model
 
@@ -127,7 +127,7 @@ class LOOLoss(nn.Module):
         # known loss
         log_probs = F.log_softmax(input, dim=1)
         loss += F.nll_loss(log_probs, Variable(target))
-        
+
         # regularization
         if self.label_smooth > 0.:
             loss -= (log_probs.mean() + self.kld_u_const) * self.label_smooth
